@@ -1,3 +1,9 @@
-//Snake namespace
-var Snake = Snake || {}
+
+window.onload() = function() {
+  //Snake namespace
+  var Snake = Snake || {}
+
+
+}
+
 
