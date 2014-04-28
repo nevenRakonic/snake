@@ -1,39 +1,53 @@
 window.onload = function() {
-  //Snake namespace
+
+  // shim layer with setTimeout fallback
+  window.requestAnimFrame = (function(){
+    return  window.requestAnimationFrame       ||
+            window.webkitRequestAnimationFrame ||
+            window.mozRequestAnimationFrame    ||
+            window.oRequestAnimationFrame      ||
+            window.msRequestAnimationFrame     ||
+            function( callback ){
+              window.setTimeout(callback, 1000 / 60);
+            };
+  })();
+
+  /* App object is related to general running */
+  var App = {}
+  App.run = true;
+
+  /* Snake object is used to describe the snake */
   var Snake = {};
-
-
   Snake.posA = 0;
   Snake.posB = 0;
+  Snake.length = 55;
+  Snake.height = 20;
 
-  Snake.canvas = document.getElementById("snake");
-  Snake.main = document.getElementById("main");
-  Snake.context = Snake.canvas.getContext("2d");
-  //Snake.context.fillRect(0,0,10,10);
+  var canvas = document.getElementById("snake");
+  var c = canvas.getContext("2d");
+  //c.fillStyle = "rgb(200,0,0)";
+  //c.fillRect(Snake.posA, Snake.posB, 55, 20);
 
+  App.loop = function() {
+    if (App.run) {
+    window.requestAnimFrame(App.loop);
+    c.clearRect(Snake.posA, Snake.posB, Snake.length, Snake.height);
 
-  for (var x = 0.5; x < 500; x += 10) {
-    Snake.context.moveTo(x, 0);
-    Snake.context.lineTo(x, 375);
+    if (Snake.posA  > canvas.width){
+      Snake.posA = 0;
+    }
+    else {
+      Snake.posA += 3;
+    }
+
+    //c.fillStyle = "rgb(200,0,0)";
+    c.fillRect(Snake.posA, Snake.posB, Snake.length, Snake.height);
+
+    }
   }
-  for (var y = 0.5; y < 375; y += 10) {
-    Snake.context.moveTo(0, y);
-    Snake.context.lineTo(500, y);
-  }
 
-  Snake.context.strokeStyle = "#eee";
-  Snake.context.stroke();
-
-  /*
-  Snake.animate = function(){
-    Snake.posA += 10;
-    Snake.posB += 10;
-  }
-  function start() {
-    setInterval(Snake.animate, 1000);
-  }
-  */
-
+  App.loop();
+  window.onclick = function (){ App.run = !App.run; App.loop();}
 
 }
 
