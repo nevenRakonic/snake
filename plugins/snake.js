@@ -27,6 +27,12 @@ window.onload = function() {
   var c = canvas.getContext("2d");
   //c.fillStyle = "rgb(200,0,0)";
   //c.fillRect(Snake.posA, Snake.posB, 55, 20);
+  function drawPartial() {
+    tempPos = Snake.posA + Snake.length - canvas.width;
+    c.clearRect(0, Snake.posB, tempPos, 20);
+    c.fillRect(0, Snake.posB, tempPos, 20);
+
+  }
 
   App.loop = function() {
     if (App.run) {
@@ -35,6 +41,10 @@ window.onload = function() {
 
     if (Snake.posA  > canvas.width){
       Snake.posA = 0;
+    }
+    else if ((Snake.posA + Snake.length) > canvas.width){
+      drawPartial();
+      Snake.posA += 3;
     }
     else {
       Snake.posA += 3;
