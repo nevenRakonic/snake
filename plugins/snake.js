@@ -19,32 +19,46 @@ window.onload = function() {
 
   /* Snake object is used to describe the snake */
   var Snake = {};
-  //Snake.posA = 0;
-  //Snake.posB = 0;
-  Snake.length = 30;
+  Snake.part_length = 20;
   Snake.height = 20;
-  Snake.parts = [[0,0],[30,0]];
+  Snake.parts = [[0, 0],[20, 0]];
+
+
+
 
   var canvas = document.getElementById("snake");
   var c = canvas.getContext("2d");
-  //c.fillStyle = "rgb(200,0,0)";
-  //c.fillRect(Snake.posA, Snake.posB, 55, 20);
   /*
   function drawPartial() {
-    tempPos = Snake.posA + Snake.length - canvas.width;
+    tempPos = Snake.posA + Snake.part_length - canvas.width;
     c.fillRect(0, Snake.posB, tempPos, 20);
 
   }*/
+  Snake.checkBoundaries = function() {
+
+  }
+
+  Snake.recreate = function(){
+    var size = Snake.parts.length;
+    var tail = Snake.parts[0];
+    var head = Snake.parts[size - 1];
+
+    if (head[0] > canvas.width - Snake.part_length*size){
+      Snake.parts.shift();
+      Snake.parts.push([0, 0]);
+    }
+    else {
+      Snake.parts.shift();
+      Snake.parts.push([head[0] + Snake.part_length, 0]);
+    }
+  }
+
   App.animate = function(){
     c.clearRect(0, 0,canvas.width, canvas.height);
-    //foreach loop could be better
+    //foreach loop might be better
     for (var i = 0; i < Snake.parts.length; i++){
-      c.fillRect(Snake.parts[i][0], Snake.parts[i][1], Snake.length, Snake.height);
+      c.fillRect(Snake.parts[i][0], Snake.parts[i][1], Snake.part_length, Snake.height);
     }
-
-    Snake.parts.shift();
-    Snake.parts.push([Snake.parts[0][0] + Snake.length, 0, Snake.length, Snake.height]);
-    App.frame += 1;
   }
 
   App.loop = function() {
@@ -55,10 +69,11 @@ window.onload = function() {
       //lowers animation speed
       if (App.frame % 10 === 0) {
         App.animate();
+        //Snake.checkBoundaries();
+        Snake.recreate();
       }
-      else  {
-        App.frame += 1;
-      }
+      App.frame += 1;
+
     }
   }
 
