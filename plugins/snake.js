@@ -24,6 +24,7 @@ window.onload = function() {
   var Snake = {};
   Snake.part_length = 20;
   Snake.height = 20;
+  //each part of the snake is an array that shows X,Y position of that part
   Snake.parts = [];
   Snake.direction = 'e';
 
@@ -55,7 +56,7 @@ window.onload = function() {
 
   }
 
-  Snake.move = function(head, size) {
+  Snake.move = function(head) {
 
     Snake.parts.shift();
     switch(Snake.direction){
@@ -71,11 +72,7 @@ window.onload = function() {
       case 's':
         Snake.parts.push([head[0], head[1] + Snake.part_length]);
         break;
-
     }
-
-
-
   }
 
   Snake.recreate = function(){
@@ -84,7 +81,7 @@ window.onload = function() {
     var head = Snake.parts[size - 1];
 
     //Snake.borderDetect(head, size);
-    Snake.move(head, size);
+    Snake.move(head);
 
   }
 
@@ -100,8 +97,20 @@ window.onload = function() {
 
   App.keyEvent = function(event){
     var possible_direction = App.eventDict[event.keyCode];
+
+    //this is nasty, nasty, nasty! :[
+    if (possible_direction === 'n' && Snake.direction === 's')
+      return null;
+    if (possible_direction === 's' && Snake.direction === 'n')
+      return null;
+    if (possible_direction === 'w' && Snake.direction === 'e')
+      return null;
+    if (possible_direction === 'e' && Snake.direction === 'w')
+      return null;
+
     if (possible_direction !== undefined)
       Snake.direction = possible_direction; console.log(Snake.direction);
+
   }
 
   App.loop = function() {
