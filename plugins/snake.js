@@ -19,6 +19,7 @@ window.onload = function() {
   //is used to bind keyevents to the direction of snake,
   //n = north, e = east etc.
   App.eventDict = {87: 'n', 68: 'e', 65: 'w', 83: 's'}
+  App.score = 0;
 
   /* Snake object is used to describe the snake */
   var Snake = {};
@@ -30,7 +31,7 @@ window.onload = function() {
 
   /* food object */
   var Food = {}
-  Food.position = [20,40];
+  Food.position = [];
   Food.length = 20;
   Food.height = 20;
   Food.exist = false;
@@ -44,7 +45,11 @@ window.onload = function() {
     c.fillRect(0, Snake.posB, tempPos, 20);
 
   }*/
-  Snake.checkBoundaries = function() {
+  Snake.checkIfMunch = function(head) {
+    if(head[0] === Food.position[0] && head[1] === Food.position[1]){
+      Food.exist = false;
+      App.score += 1;
+    }
 
   }
 
@@ -108,6 +113,7 @@ window.onload = function() {
     var tail = Snake.parts[0];
     var head = Snake.parts[size - 1];
 
+    Snake.checkIfMunch(head);
     //borderdetect checks if the snake got out of boundaries and needs to be
     //redrawn on the site, if not it's a regular move
     if(!Snake.borderDetect(head))
@@ -115,10 +121,10 @@ window.onload = function() {
 
   }
 
-  App.generateRandomPosition = function(){
-    var x = Math.floor(Math.random()*32)*20;
-    var y = Math.floor(Math.random()*32)*20;
-    return [x,y];
+  App.generateRandomXYPosition = function(){
+    var XYPositions = [0,0]
+    XYPositions = XYPositions.map(function() { return Math.floor(Math.random()*32)*20; });
+    return XYPositions;
   }
 
 
@@ -129,13 +135,13 @@ window.onload = function() {
       c.fillRect(Snake.parts[i][0], Snake.parts[i][1], Snake.part_length, Snake.height);
     }
 
-    if (Food.exist)
-      c.fillRect(Food.position[0], Food.position[1], Food.length, Food.height);
-    else {
-      Food.position = App.generateRandomPosition();
+    //takes care of food
+    if (!Food.exist){
+      console.log(App.score);
+      Food.position = App.generateRandomXYPosition();
       Food.exist = true;
-      c.fillRect(Food.position[0], Food.position[1], Food.length, Food.height);
     }
+    c.fillRect(Food.position[0], Food.position[1], Food.length, Food.height);
   }
 
   App.keyEvent = function(event){
