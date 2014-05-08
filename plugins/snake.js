@@ -47,12 +47,32 @@ window.onload = function() {
     }
   }
 
-  Snake.borderDetect = function(head, size){
+  Snake.borderDetect = function(head){
 
-    if (head[0] > canvas.width - Snake.part_length*size){
+    var border_crossed = false;
+
+    if (head[0] > canvas.width - Snake.part_length){
       Snake.parts.shift();
       Snake.parts.push([0, head[1]]);
+      border_crossed = true;
     }
+    else if (head[0] < 0){
+      Snake.parts.shift();
+      Snake.parts.push([canvas.width - Snake.part_length, head[1]]);
+      border_crossed = true;
+    }
+    else if (head[1] < 0 ){
+      Snake.parts.shift();
+      Snake.parts.push([head[0], canvas.height - Snake.part_length]);
+      border_crossed = true;
+    }
+    else if (head[1] > canvas.height - Snake.part_length){
+      Snake.parts.shift();
+      Snake.parts.push([head[0], 0]);
+      border_crossed = true;
+    }
+
+    return border_crossed;
 
   }
 
@@ -80,8 +100,8 @@ window.onload = function() {
     var tail = Snake.parts[0];
     var head = Snake.parts[size - 1];
 
-    //Snake.borderDetect(head, size);
-    Snake.move(head);
+    if(!Snake.borderDetect(head))
+      Snake.move(head);
 
   }
 
@@ -131,7 +151,7 @@ window.onload = function() {
 
   /* pre loop calls */
   // determines the initial size of the snake
-  Snake.initializeParts(8)
+  Snake.initializeParts(28)
 
   /* main loop */
   App.loop();
