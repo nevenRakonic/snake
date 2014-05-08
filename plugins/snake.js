@@ -24,9 +24,16 @@ window.onload = function() {
   var Snake = {};
   Snake.part_length = 20;
   Snake.height = 20;
-  //each part of the snake is an array that shows X,Y position of that part
+  //each part of the snake is a member od of parts array that shows X,Y position of that part
   Snake.parts = [];
   Snake.direction = 'e';
+
+  /* food object */
+  var Food = {}
+  Food.position = [20,40];
+  Food.length = 20;
+  Food.height = 20;
+  Food.exist = false;
 
 
   var canvas = document.getElementById("snake");
@@ -51,6 +58,7 @@ window.onload = function() {
 
     var border_crossed = false;
 
+    //bunch of duplication here, needs to be refactored
     if (head[0] > canvas.width - Snake.part_length){
       Snake.parts.shift();
       Snake.parts.push([0, head[1]]);
@@ -100,18 +108,33 @@ window.onload = function() {
     var tail = Snake.parts[0];
     var head = Snake.parts[size - 1];
 
+    //borderdetect checks if the snake got out of boundaries and needs to be
+    //redrawn on the site, if not it's a regular move
     if(!Snake.borderDetect(head))
       Snake.move(head);
 
   }
 
+  App.generateRandomPosition = function(){
+    var x = Math.floor(Math.random()*32)*20;
+    var y = Math.floor(Math.random()*32)*20;
+    return [x,y];
+  }
 
 
   App.draw = function(){
     c.clearRect(0, 0,canvas.width, canvas.height);
-    //foreach loop might be better
+    //foreach loop might be better, draws snake
     for (var i = 0; i < Snake.parts.length; i++){
       c.fillRect(Snake.parts[i][0], Snake.parts[i][1], Snake.part_length, Snake.height);
+    }
+
+    if (Food.exist)
+      c.fillRect(Food.position[0], Food.position[1], Food.length, Food.height);
+    else {
+      Food.position = App.generateRandomPosition();
+      Food.exist = true;
+      c.fillRect(Food.position[0], Food.position[1], Food.length, Food.height);
     }
   }
 
