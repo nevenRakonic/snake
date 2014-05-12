@@ -30,7 +30,7 @@ window.onload = function() {
   Snake.direction = 'e';
 
   /* food object */
-  var Food = {}
+  var Food = {};
   Food.position = [];
   Food.length = 20;
   Food.height = 20;
@@ -65,22 +65,18 @@ window.onload = function() {
 
     //bunch of duplication here, needs to be refactored
     if (head[0] > canvas.width - Snake.part_length){
-      Snake.parts.shift();
       Snake.parts.push([0, head[1]]);
       border_crossed = true;
     }
     else if (head[0] < 0){
-      Snake.parts.shift();
       Snake.parts.push([canvas.width - Snake.part_length, head[1]]);
       border_crossed = true;
     }
     else if (head[1] < 0 ){
-      Snake.parts.shift();
       Snake.parts.push([head[0], canvas.height - Snake.part_length]);
       border_crossed = true;
     }
     else if (head[1] > canvas.height - Snake.part_length){
-      Snake.parts.shift();
       Snake.parts.push([head[0], 0]);
       border_crossed = true;
     }
@@ -90,8 +86,6 @@ window.onload = function() {
   }
 
   Snake.move = function(head) {
-
-    Snake.parts.shift();
     switch(Snake.direction){
       case 'e':
         Snake.parts.push([head[0] + Snake.part_length, head[1]]);
@@ -112,6 +106,9 @@ window.onload = function() {
     var size = Snake.parts.length;
     var tail = Snake.parts[0];
     var head = Snake.parts[size - 1];
+
+    //snake always loose a part atm
+    Snake.parts.shift()
 
     Snake.checkIfMunch(head);
     //borderdetect checks if the snake got out of boundaries and needs to be
