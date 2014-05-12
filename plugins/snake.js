@@ -15,26 +15,43 @@ window.onload = function() {
   /* App object is related to general running */
   var App = {};
   App.run = true;
-  App.frame = 0;
+
   //is used to bind keyevents to the direction of snake,
   //n = north, e = east etc.
   App.eventDict = {87: 'n', 68: 'e', 65: 'w', 83: 's'}
-  App.score = 0;
+
 
   /* Snake object is used to describe the snake */
   var Snake = {};
   Snake.part_length = 20;
   Snake.height = 20;
-  //each part of the snake is a member od of parts array that shows X,Y position of that part
-  Snake.parts = [];
   Snake.direction = 'e';
+
+  Snake.initializeParts = function(snake_size){
+    for (var i = 0; i < snake_size; i++){
+      Snake.parts.push([i*20, 200])
+    }
+  }
 
   /* food object */
   var Food = {};
-  Food.position = [];
   Food.length = 20;
   Food.height = 20;
-  Food.exist = false;
+
+
+  App.reset = function(){
+
+    App.frame = 0;
+    App.score = 0;
+    //each part of the snake is a member od of parts array that shows X,Y position of that part
+    Snake.parts = [];
+    Snake.direction = 'e';
+    // determines the initial size of the snake
+    Snake.initializeParts(28);
+
+    Food.position = [];
+    Food.exist = false;
+  }
 
 
   var canvas = document.getElementById("snake");
@@ -49,13 +66,6 @@ window.onload = function() {
     if(head[0] === Food.position[0] && head[1] === Food.position[1]){
       Food.exist = false;
       App.score += 1;
-    }
-
-  }
-
-  Snake.initializeParts = function(snake_size){
-    for (var i = 0; i < snake_size; i++){
-      Snake.parts.push([i*20, 200])
     }
   }
 
@@ -179,6 +189,7 @@ window.onload = function() {
       if (App.frame % 8 === 0) {
         App.draw();
         Snake.recreate();
+        console.log(App.score);
       }
       App.frame += 1;
 
@@ -186,14 +197,14 @@ window.onload = function() {
   }
 
   /* pre loop calls */
-  // determines the initial size of the snake
-  Snake.initializeParts(28)
+  App.reset();
 
   /* main loop */
   App.loop();
 
   /* event handlers */
-  window.onclick = function (){ App.run = !App.run; App.loop(); }
+  //might need a bool flag here to differentiate between game over and pause
+  window.onclick = function (){ App.run = !App.run; App.reset(); App.loop(); }
   window.onkeydown = App.keyEvent;
 
 }
