@@ -85,6 +85,16 @@ window.onload = function() {
 
   }
 
+  Snake.checkCollision = function(head){
+
+    //Snake.parts - 1 means we check the whole length of the snake except
+    //the last one which is the head of the snake.
+    for (var i = 0; i < Snake.parts.length -1 ; i++){
+      if(Snake.parts[i][0] === head[0] && Snake.parts[i][1] === head[1])
+        App.run = false;
+    }
+  }
+
   Snake.move = function(head) {
     switch(Snake.direction){
       case 'e':
@@ -109,6 +119,7 @@ window.onload = function() {
 
     //snake always loose a part atm
     Snake.parts.shift()
+    Snake.checkCollision(head);
 
     Snake.checkIfMunch(head);
     //borderdetect checks if the snake got out of boundaries and needs to be
@@ -167,7 +178,6 @@ window.onload = function() {
       //lowers animation speed
       if (App.frame % 8 === 0) {
         App.draw();
-        //Snake.checkBoundaries();
         Snake.recreate();
       }
       App.frame += 1;
