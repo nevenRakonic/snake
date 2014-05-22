@@ -13,14 +13,26 @@
               };
     })();
 
+
+    /* canvas related variables */
+    var canvas = document.getElementById("snake");
+    var c = canvas.getContext("2d");
+    c.font = '30pt helvetica';
+
+    /*
+    function drawPartial() {
+      tempPos = Snake.posA + Snake.part_length - canvas.width;
+      c.fillRect(0, Snake.posB, tempPos, 20);
+
+    }*/
+
     /* App object is related to general running */
     var App = {};
     App.run = true;
 
     //is used to bind keyevents to the direction of snake,
     //n = north, e = east etc.
-    App.eventDict = {87: 'n', 68: 'e', 65: 'w', 83: 's'}
-
+    App.eventDict = {87: 'n', 68: 'e', 65: 'w', 83: 's'};
 
     /* Snake object is used to describe the snake */
     var Snake = {};
@@ -28,19 +40,20 @@
     Snake.height = 20;
     Snake.direction = 'e';
 
-    Snake.initializeParts = function(snake_size){
-      for (var i = 0; i < snake_size; i++){
-        Snake.parts.push([i*20, 200])
-      }
-    }
-
     /* food object */
     var Food = {};
     Food.length = 20;
     Food.height = 20;
 
+    Food.recreate = function(){
+      if (!Food.exist){
+        Food.position = App.generateRandomXYPosition();
+        Food.exist = true;
+      }
+    }
 
-    App.reset = function(){
+
+    App.initialize = function(){
 
       App.frame = 0;
       App.score = 0;
@@ -49,21 +62,18 @@
       Snake.direction = 'e';
       Snake.toGrow = [];
       // determines the initial size of the snake
-      Snake.initializeParts(2);
+      Snake.initializeParts(10);
 
       Food.position = [];
       Food.exist = false;
     }
 
+    Snake.initializeParts = function(snake_size){
+      for (var i = 0; i < snake_size; i++){
+        Snake.parts.push([i*20, 200])
+      }
+    }
 
-    var canvas = document.getElementById("snake");
-    var c = canvas.getContext("2d");
-    /*
-    function drawPartial() {
-      tempPos = Snake.posA + Snake.part_length - canvas.width;
-      c.fillRect(0, Snake.posB, tempPos, 20);
-
-    }*/
     Snake.checkIfMunch = function(head) {
       if(head[0] === Food.position[0] && head[1] === Food.position[1]){
         Food.exist = false;
@@ -160,17 +170,16 @@
     App.draw = function(){
       c.clearRect(0, 0,canvas.width, canvas.height);
       //foreach loop might be better, draws snake
+      c.fillStyle = 'black';
       for (var i = 0; i < Snake.parts.length; i++){
         c.fillRect(Snake.parts[i][0], Snake.parts[i][1], Snake.part_length, Snake.height);
       }
 
       //takes care of food
-      if (!Food.exist){
-        console.log(App.score);
-        Food.position = App.generateRandomXYPosition();
-        Food.exist = true;
-      }
+
       c.fillRect(Food.position[0], Food.position[1], Food.length, Food.height);
+      c.fillStyle = 'red';
+      c.fillText('' + App.score, 600, 50);
     }
 
     App.keyEvent = function(event){
@@ -198,8 +207,11 @@
 
         //lowers animation speed
         if (App.frame % 8 === 0) {
-          App.draw();
+
           Snake.recreate();
+          Food.recreate();
+          App.draw();
+
         }
         App.frame += 1;
 
@@ -207,14 +219,14 @@
     }
 
     /* pre loop calls */
-    App.reset();
+    App.initialize();
 
     /* main loop */
     App.loop();
 
     /* event handlers */
     //might need a bool flag here to differentiate between game over and pause
-    window.onclick = function (){ App.run = !App.run; App.reset(); App.loop(); }
+    window.onclick = function (){ App.run = !App.run; App.initialize(); App.loop(); }
     window.onkeydown = App.keyEvent;
   }
 
