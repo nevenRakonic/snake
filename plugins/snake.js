@@ -29,6 +29,7 @@
     /* App object is related to general running */
     var App = {};
     App.run = false;
+    App.gameOver = false;
 
 
     //is used to bind keyevents to the direction of snake,
@@ -63,7 +64,7 @@
       Snake.direction = 'e';
       Snake.toGrow = [];
       // determines the initial size of the snake
-      Snake.initializeParts(28);
+      Snake.initializeParts(20);
 
       Food.position = [];
       Food.exist = false;
@@ -114,7 +115,7 @@
       //the last part which is the head of the snake.
       for (var i = 0; i < Snake.parts.length -1 ; i++){
         if(Snake.parts[i][0] === head[0] && Snake.parts[i][1] === head[1]){
-          App.collided = true;
+          App.gameOver = true;
           App.changeRunning();
         }
       }
@@ -146,7 +147,7 @@
         Snake.parts.shift();
       }
       else {
-        Snake.toGrow = [];        c
+        Snake.toGrow = [];
       }
 
       Snake.checkCollision(head);
@@ -174,7 +175,7 @@
       //foreach loop might be better, draws snake
       c.fillStyle = 'black';
       for (var i = 0; i < Snake.parts.length; i++){
-        c.fillRect(Snake.parts[i][0], Snake.parts[i][1], Snake.part_length, Snake.height);
+        c.fillRect(Snake.parts[i][0], Snake.parts[i][1], Snake.part_length - 0.5, Snake.height - 0.5);
       }
 
       //takes care of food
@@ -206,9 +207,9 @@
         }
         App.frame += 1;
 
-        if (App.collided){
+        if (App.gameOver){
           App.initialize();
-          App.collided = false;
+          App.gameOver = false;
           //draw game over
         }
 
@@ -225,10 +226,9 @@
       var key = App.eventDict[event.keyCode];
       if (key === 'PAUSE'){
         App.changeRunning();
-        if (!App.collided){
+        if (!App.gameOver){
           App.loop();
         }
-
         return null;
       }
 
