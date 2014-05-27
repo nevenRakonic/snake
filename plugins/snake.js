@@ -28,17 +28,18 @@
 
     /* App object is related to general running */
     var App = {};
-    App.run = true;
+    App.run = false;
+
 
     //is used to bind keyevents to the direction of snake,
     //n = north, e = east etc.
-    App.eventDict = {87: 'n', 68: 'e', 65: 'w', 83: 's'};
+    App.eventDict = {87: 'n', 68: 'e', 65: 'w', 83: 's', 32: 'PAUSE'};
 
     /* Snake object is used to describe the snake */
     var Snake = {};
     Snake.part_length = 20;
     Snake.height = 20;
-    Snake.direction = 'e';
+
 
     /* food object */
     var Food = {};
@@ -50,29 +51,29 @@
         Food.position = App.generateRandomXYPosition();
         Food.exist = true;
       }
-    }
-
+    };
 
     App.initialize = function(){
 
+      /* stuff that isn't constant has to be reset */
       App.frame = 0;
       App.score = 0;
-      //each part of the snake is a member od of parts array that shows X,Y position of that part
+      //each part of the snake is a member of parts array that shows X,Y position of that part
       Snake.parts = [];
       Snake.direction = 'e';
       Snake.toGrow = [];
       // determines the initial size of the snake
-      Snake.initializeParts(10);
+      Snake.initializeParts(28);
 
       Food.position = [];
       Food.exist = false;
-    }
+    };
 
     Snake.initializeParts = function(snake_size){
       for (var i = 0; i < snake_size; i++){
-        Snake.parts.push([i*20, 200])
+        Snake.parts.push([i*20, 200]);
       }
-    }
+    };
 
     Snake.checkIfMunch = function(head) {
       if(head[0] === Food.position[0] && head[1] === Food.position[1]){
@@ -80,10 +81,9 @@
         Snake.toGrow = Food.position;
         App.score += 1;
       }
-    }
+    };
 
     Snake.borderDetect = function(head){
-
       var border_crossed = false;
 
       //bunch of duplication here, needs to be refactored
@@ -106,17 +106,19 @@
 
       return border_crossed;
 
-    }
+    };
 
     Snake.checkCollision = function(head){
 
       //Snake.parts - 1 means we check the whole length of the snake except
       //the last part which is the head of the snake.
       for (var i = 0; i < Snake.parts.length -1 ; i++){
-        if(Snake.parts[i][0] === head[0] && Snake.parts[i][1] === head[1])
-          App.run = false;
+        if(Snake.parts[i][0] === head[0] && Snake.parts[i][1] === head[1]){
+          App.collided = true;
+          App.changeRunning();
+        }
       }
-    }
+    };
 
     Snake.move = function(head) {
       switch(Snake.direction){
@@ -133,37 +135,37 @@
           Snake.parts.push([head[0], head[1] + Snake.part_length]);
           break;
       }
-    }
+    };
 
     Snake.recreate = function(){
       var size = Snake.parts.length;
       var tail = Snake.parts[0];
       var head = Snake.parts[size - 1];
 
-      //snake always loose a part atm
       if (tail[0] !== Snake.toGrow[0]){
         Snake.parts.shift();
       }
       else {
-        Snake.toGrow = [];
-        console.log('here');
+        Snake.toGrow = [];        c
       }
 
-
       Snake.checkCollision(head);
-
       Snake.checkIfMunch(head);
       //borderdetect checks if the snake got out of boundaries and needs to be
       //redrawn on the other side, if not it's a regular move
       if(!Snake.borderDetect(head))
         Snake.move(head);
-
-    }
+    };
 
     App.generateRandomXYPosition = function(){
-      var XYPositions = [0,0]
+      //position created is within the maps parameters
+      var XYPositions = [0,0];
       XYPositions = XYPositions.map(function() { return Math.floor(Math.random()*32)*20; });
       return XYPositions;
+    };
+
+    App.changeRunning = function(){
+      App.run = !App.run;
     }
 
 
@@ -179,26 +181,17 @@
 
       c.fillRect(Food.position[0], Food.position[1], Food.length, Food.height);
       c.fillStyle = 'red';
-      c.fillText('' + App.score, 600, 50);
+      c.fillText('' + App.score, 500, 50);
+    };
+
+    App.startNew = function(){
+      /* pre loop calls */
+      App.initialize();
+
+      /* main loop */
+      App.loop();
     }
 
-    App.keyEvent = function(event){
-      var possible_direction = App.eventDict[event.keyCode];
-
-      //this is nasty, nasty, nasty! :[
-      if (possible_direction === 'n' && Snake.direction === 's')
-        return null;
-      if (possible_direction === 's' && Snake.direction === 'n')
-        return null;
-      if (possible_direction === 'w' && Snake.direction === 'e')
-        return null;
-      if (possible_direction === 'e' && Snake.direction === 'w')
-        return null;
-
-      if (possible_direction !== undefined)
-        Snake.direction = possible_direction; console.log(Snake.direction);
-
-    }
 
     App.loop = function() {
       if (App.run) {
@@ -206,29 +199,55 @@
         window.requestAnimFrame(App.loop);
 
         //lowers animation speed
-        if (App.frame % 8 === 0) {
-
+        if (App.frame % 3 === 0) {
+          App.draw();
           Snake.recreate();
           Food.recreate();
-          App.draw();
-
         }
         App.frame += 1;
 
-      }
-    }
+        if (App.collided){
+          App.initialize();
+          App.collided = false;
+          //draw game over
+        }
 
-    /* pre loop calls */
-    App.initialize();
+      }
+    };
+
 
     /* main loop */
-    App.loop();
+    App.startNew();
 
     /* event handlers */
-    //might need a bool flag here to differentiate between game over and pause
-    window.onclick = function (){ App.run = !App.run; App.initialize(); App.loop(); }
+    App.keyEvent = function(event){
+
+      var key = App.eventDict[event.keyCode];
+      if (key === 'PAUSE'){
+        App.changeRunning();
+        if (!App.collided){
+          App.loop();
+        }
+
+        return null;
+      }
+
+      //this is nasty, nasty, nasty! :[
+      if (key === 'n' && Snake.direction === 's')
+        return null;
+      if (key === 's' && Snake.direction === 'n')
+        return null;
+      if (key === 'w' && Snake.direction === 'e')
+        return null;
+      if (key === 'e' && Snake.direction === 'w')
+        return null;
+
+      if (key !== undefined)
+        Snake.direction = key; console.log(Snake.direction);
+    };
+    window.onclick = function (){ App.changeRunning(); App.startNew(); };
     window.onkeydown = App.keyEvent;
-  }
+  };
 
 })();
 
