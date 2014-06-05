@@ -1,6 +1,5 @@
 (function(){
   window.onload = function() {
-    //snake should be a stack with parts that are pushed/poped every key event (direction change)
     //shim layer with setTimeout fallback
     window.requestAnimFrame = (function(){
       return  window.requestAnimationFrame       ||
@@ -30,6 +29,8 @@
     var App = {};
     App.run = false;
     App.gameOver = false;
+    //determines how fast the snake will move, every xth frame
+    App.speed_modulo = 4;
 
     //is used to bind keyevents to the direction of snake,
     //n = north, e = east etc.
@@ -185,6 +186,7 @@
       }
 
       //takes care of food
+      c.fillStyle = 'grey';
       c.fillRect(Food.position[0], Food.position[1], Food.length, Food.height);
       c.fillStyle = 'red';
       c.fillText('' + App.score, 500, 50);
@@ -201,11 +203,11 @@
 
     App.loop = function() {
       if (App.run) {
-        //game loop
+        //drawing loop
         window.requestAnimFrame(App.loop);
 
         //lowers animation speed
-        if (App.frame % 3 === 0) {
+        if (App.frame % App.speed_modulo === 0) {
           App.draw();
           Snake.recreate();
           Food.recreate();
@@ -215,12 +217,11 @@
         App.frame += 1;
         App.in_logic = false;
 
-        if (App.gameOver){
+        if (App.gameOver) {
           App.initialize();
           App.gameOver = false;
           //draw game over
         }
-
       }
     };
 
@@ -242,16 +243,6 @@
         }
         return null;
       }
-
-      //this is nasty, nasty, nasty! :[
-      // if (key === 'n' && Snake.direction === 's')
-      //   return null;
-      // if (key === 's' && Snake.direction === 'n')
-      //   return null;
-      // if (key === 'w' && Snake.direction === 'e')
-      //   return null;
-      // if (key === 'e' && Snake.direction === 'w')
-      //   return null;
 
       if (key !== undefined && Snake.opposite_direction[key] !== Snake.direction)
         Snake.direction = key; console.log(Snake.direction);
