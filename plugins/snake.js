@@ -30,7 +30,7 @@
     App.run = false;
     App.gameOver = false;
     //determines how fast the snake will move, every xth frame
-    App.speed_modulo = 4;
+    App.speed_modulo = 3;
 
     //is used to bind keyevents to the direction of snake,
     //n = north, e = east etc.
@@ -41,8 +41,7 @@
     Snake.part_length = 20;
     Snake.height = 20;
     /* this dict is used to prevent player from reversing the snake*/
-    Snake.opposite_direction = {'n':'s', 's':'n','w':'e','e':'w'}
-
+    Snake.opposite_direction = {'n':'s', 's':'n','w':'e','e':'w'};
 
     /* food object */
     var Food = {};
@@ -151,6 +150,7 @@
 
     App.initialize = function(){
       /* stuff that isn't constant has to be reset so parts of objects are initialized here */
+      //js uses 64 bit numbers so no fear of overflow, e.g. if the game takes too long
       App.frame = 0;
       App.score = 0;
       //each part of the snake is a member of parts array that shows X,Y position of that part
@@ -211,11 +211,11 @@
           App.draw();
           Snake.recreate();
           Food.recreate();
-          App.in_logic = true;
+          Snake.freeze_direction = false;
         }
 
         App.frame += 1;
-        App.in_logic = false;
+
 
         if (App.gameOver) {
           App.initialize();
@@ -224,16 +224,13 @@
         }
       }
     };
-
-
-
+    Snake.freeze_direction = false;
 
     /* main loop */
     App.startNew();
 
     /* event handlers */
     App.keyEvent = function(event){
-
       var key = App.eventDict[event.keyCode];
       /*checks if pause key should pause the running game, or restart it if it's over*/
       if (key === 'PAUSE'){
@@ -244,8 +241,12 @@
         return null;
       }
 
-      if (key !== undefined && Snake.opposite_direction[key] !== Snake.direction)
+      //checks if key is one of the controls and also
+      if (key !== undefined && Snake.opposite_direction[key] !== Snake.direction && !Snake.freeze_direction){
         Snake.direction = key; console.log(Snake.direction);
+        Snake.freeze_direction = true;
+      }
+
     };
     window.onclick = function (){ App.changeRunning(); App.startNew(); };
     window.onkeydown = App.keyEvent;
