@@ -18,19 +18,12 @@
     var c = canvas.getContext("2d");
     c.font = '30pt helvetica';
 
-    /*
-    function drawPartial() {
-      tempPos = Snake.posA + Snake.part_length - canvas.width;
-      c.fillRect(0, Snake.posB, tempPos, 20);
-
-    }*/
-
     /* App object is related to general running */
     var App = {};
     App.run = false;
     App.gameOver = false;
     //determines how fast the snake will move, every xth frame
-    App.speed_modulo = 3;
+    App.speed_modulo = 5;
 
     //is used to bind keyevents to the direction of snake,
     //n = north, e = east etc.
@@ -47,6 +40,27 @@
     var Food = {};
     Food.length = 20;
     Food.height = 20;
+
+    App.initialize = function(){
+      /* stuff that isn't constant has to be reset so parts of objects are initialized here */
+      // js uses 64 bit numbers so no fear of overflow, e.g. if the game takes too long
+      App.frame = 0;
+      App.score = 0;
+      // each part of the snake is a member of parts array that shows X,Y position of that part
+      Snake.parts = [];
+      Snake.direction = 'e';
+      // keeps to track of where the snake has eaten the food, it's where it will grow after the tail passes it
+      Snake.toGrow = [];
+      // determines the initial size of the snake
+      Snake.initializeParts(20);
+      // might not need this, cause it's declared in the loop, putting it here for sake of clarity
+      Snake.freeze_direction = false;
+      Snake.bufferedMove = null;
+
+
+      Food.position = [];
+      Food.exist = false;
+    };
 
     Food.recreate = function(){
       if (!Food.exist){
@@ -98,7 +112,6 @@
     };
 
     Snake.checkCollision = function(head){
-
       //Snake.parts - 1 means we check the whole length of the snake except
       //the last part which is the head of the snake.
       for (var i = 0; i < Snake.parts.length -1 ; i++){
@@ -148,22 +161,7 @@
         Snake.move(head);
     };
 
-    App.initialize = function(){
-      /* stuff that isn't constant has to be reset so parts of objects are initialized here */
-      //js uses 64 bit numbers so no fear of overflow, e.g. if the game takes too long
-      App.frame = 0;
-      App.score = 0;
-      //each part of the snake is a member of parts array that shows X,Y position of that part
-      Snake.parts = [];
-      Snake.direction = 'e';
-      // keeps to track of where the snake has eaten the food, it's where it will grow after the tail passes it
-      Snake.toGrow = [];
-      // determines the initial size of the snake
-      Snake.initializeParts(20);
 
-      Food.position = [];
-      Food.exist = false;
-    };
 
     App.generateRandomXYPosition = function(){
       //position created is within the maps parameters
@@ -212,6 +210,7 @@
           Snake.recreate();
           Food.recreate();
           Snake.freeze_direction = false;
+          Snake.bufferedMove = null;
         }
 
         App.frame += 1;
@@ -224,9 +223,15 @@
         }
       }
     };
-    Snake.freeze_direction = false;
 
-    /* main loop */
+    Snake.checkBuffer = function() {
+      if (Snake.bufferedMove !== null && !Snake.freeze_direction) {
+        Snake.direction = Snake.bufferedMove;
+        Snake.bufferedMove = null;
+      }
+    }
+
+    /* initializes the game and starts the main loop */
     App.startNew();
 
     /* event handlers */
@@ -241,10 +246,14 @@
         return null;
       }
 
-      //checks if key is one of the controls and also
+      //checks if keypress doesn't cause the snake to go into opposite direction
       if (key !== undefined && Snake.opposite_direction[key] !== Snake.direction && !Snake.freeze_direction){
         Snake.direction = key; console.log(Snake.direction);
         Snake.freeze_direction = true;
+      }
+      else {
+        console.log("move blocked");
+        Snake.bufferedMove = key;
       }
 
     };
